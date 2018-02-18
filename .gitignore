@@ -1,0 +1,10 @@
+.*
+!/.gitignore
+
+__pycache__/
+*.py[cod]
+
+.coverage
+.cache
+
+prefs.json
