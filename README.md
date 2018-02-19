@@ -1,5 +1,5 @@
 # TorchNLP
-TorchNLP is a deep learning library for NLP tasks. Built on PyTorch and TorchText, it is an attempt to provide reusable components that work across tasks. Currently it can be used for the Named Entity Recognition (NER) task with a Bidirectional LSTM CRF model and a Transformer network model. It can support any dataset which uses the Conll 2003 format. More tasks will be added shortly
+TorchNLP is a deep learning library for NLP tasks. Built on PyTorch and TorchText, it is an attempt to provide reusable components that work across tasks. Currently it can be used for the Named Entity Recognition (NER) task with a Bidirectional LSTM CRF model and a Transformer network model. It can support any dataset which uses the [CoNLL 2003 format](https://www.clips.uantwerpen.be/conll2003/ner/). More tasks will be added shortly
 
 ## High Level Workflow
 1. Define the NLP task
@@ -25,11 +25,147 @@ TorchNLP is a deep learning library for NLP tasks. Built on PyTorch and TorchTex
 * `BiLSTMTagger`: Sequence tagging model implemented using bidirectional LSTMs and CRF
 
 ## Installation
-TBA
+TorchNLP requires a minimum of Python 3.5 and PyTorch 0.2.0 to run. Check [Pytorch](http://pytorch.org/) for the installation steps.
+Clone this repository and install other dependencies like TorchText:
+```
+pip install -r requirements.txt
+```
+Check for integrity with PyTest:
+```
+pytest
+```
 
 ## Usage
 TorchNLP is designed to be used inside the python interpreter to make it easier to experiment without typing cumbersome command line arguments. 
 
 **NER Task**
 
-TBA
+The NER task can be run on any dataset that confirms to the [CoNLL 2003](https://www.clips.uantwerpen.be/conll2003/ner/) format. To use the CoNLL 2003 NER dataset place the dataset files in the following directory structure:
+```
+.data
+  |
+  |---conll2003
+          |
+          |---eng.train.txt
+          |---eng.testa.txt
+          |---eng.testb.txt
+```
+`eng.testa.txt` is used the validation dataset and `eng.testb.txt` is used as the test dataset.
+
+Start the NER module in the python shell which sets up the imports:
+```
+python -i -m torchnlp.ner
+```
+```
+Task: Named Entity Recognition
+
+Available models:
+-------------------
+TransformerTagger
+
+    Sequence tagger using the Transformer network (https://arxiv.org/pdf/1706.03762.pdf)
+    Specifically it uses the Encoder module. For character embeddings (per word) it uses
+    the same Encoder module above which an additive (Bahdanau) self-attention layer is added
+
+BiLSTMTagger
+
+    Sequence tagger using bidirectional LSTM. For character embeddings per word
+    uses (unidirectional) LSTM
+
+
+Available datasets:
+-------------------
+    conll2003: Conll 2003 (Parser only. You must place the files)
+
+>>>
+```
+
+Train the [Transformer](https://arxiv.org/abs/1706.03762) model on the CoNLL 2003 dataset:
+```
+>>> train(TransformerTagger, conll2003)
+```
+By default it will use the F1 metric with a window of 5 epochs to perform early stopping. To change the early stopping criteria set the `PREFS` global variable as follows:
+```
+>>> PREFS.early_stopping='lowest_3_loss'
+```
+This will now use validation loss as the stopping criteria with a window of 3 epochs. The model files are saved under *taskname-modelname* directory. In this case it is *conll2003.ner-TransformerTagger*
+
+Evaluate the trained model on the *testb* dataset split:
+```
+>>> evaluate(TransformerTagger, conll2003, 'test')
+```
+It will display metrics like accuracy, sequence accuracy, F1 etc
+
+Run the trained model interactively:
+```
+>>> interactive(TransformerTagger)
+```
+You can similarly train the bidirectional LSTM CRF model by using the `BiLSTMTagger` class.
+Customizing hyperparameters is quite straight forward. Let's look at the hyperparameters for `TransformerTagger`:
+```
+>>> h2 = hparams_transformer_ner()
+>>> h2
+
+Hyperparameters:
+ filter_size=128
+ optimizer_adam_beta2=0.98
+ learning_rate=0.2
+ learning_rate_warmup_steps=500
+ input_dropout=0.2
+ embedding_size_char=16
+ dropout=0.2
+ hidden_size=128
+ optimizer_adam_beta1=0.9
+ embedding_size_word=300
+ max_length=256
+ attention_dropout=0.2
+ relu_dropout=0.2
+ batch_size=100
+ num_hidden_layers=1
+ attention_value_channels=0
+ attention_key_channels=0
+ use_crf=True
+ embedding_size_tags=100
+ learning_rate_decay=noam_step
+ embedding_size_char_per_word=100
+ num_heads=4
+ filter_size_char=64
+ ```
+ Now let's disable the CRF layer:
+ ```
+ >>> h2.update(use_crf=False)
+
+Hyperparameters:
+ filter_size=128
+ optimizer_adam_beta2=0.98
+ learning_rate=0.2
+ learning_rate_warmup_steps=500
+ input_dropout=0.2
+ embedding_size_char=16
+ dropout=0.2
+ hidden_size=128
+ optimizer_adam_beta1=0.9
+ embedding_size_word=300
+ max_length=256
+ attention_dropout=0.2
+ relu_dropout=0.2
+ batch_size=100
+ num_hidden_layers=1
+ attention_value_channels=0
+ attention_key_channels=0
+ use_crf=False
+ embedding_size_tags=100
+ learning_rate_decay=noam_step
+ embedding_size_char_per_word=100
+ num_heads=4
+ filter_size_char=64
+ ```
+ Use it to re-train the model:
+ ```
+ >>> train(TransformerTagger, conll2003, hparams=h2)
+ ```
+ Along with the model the hyperparameters are also saved so there is no need to pass the `HParams` object during evaluation. Also note that by default it will not overwrite any existing model directories (will rename instead). To change that behavior set the PREFS variable
+ ```
+ >>> PREFS.overwrite_model_dir = True
+ ```
+ The `PREFS` variable is automatically persisted in `prefs.json`
