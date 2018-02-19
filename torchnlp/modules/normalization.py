@@ -9,7 +9,7 @@ class LayerNorm(nn.Module):
     # Borrowed from jekbradbury
     # https://github.com/pytorch/pytorch/issues/1959
     def __init__(self, features, eps=1e-6):
-        super().__init__()
+        super(LayerNorm, self).__init__()
         self.gamma = nn.Parameter(torch.ones(features))
         self.beta = nn.Parameter(torch.zeros(features))
         self.eps = eps

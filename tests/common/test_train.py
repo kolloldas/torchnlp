@@ -33,6 +33,7 @@ class DummyIter(object):
             return self.count
         else:
             raise StopIteration
+    next = __next__
 
 def test_get_early_stopping_criteria(tmpdir):
     tmpdir.chdir()

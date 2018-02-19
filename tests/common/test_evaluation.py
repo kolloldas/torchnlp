@@ -51,6 +51,7 @@ class DummyIter(object):
             return self.count
         else:
             raise StopIteration
+    next = __next__
 
 def test_convert_iob_to_segments():
     tags = ['B-PER', 'I-PER', 'B-ORG', 'I-ORG',

@@ -173,4 +173,4 @@ class Model(nn.Module):
         """
         model_dir = gen_model_dir(task_name, self.__class__)
         checkpoint_path = os.path.join(model_dir, CHECKPOINT_FILE.format(int(iteration)))
-        os.utime(checkpoint_path)
+        os.utime(checkpoint_path, None)
