@@ -1,0 +1,11 @@
+# torch is not available via pip
+
+# Need to install TorchText from git for advanced features
+git+git://github.com/pytorch/text.git
+numpy
+tqdm
+
+# Tests
+pytest
+pytest-mock
+pytest-pythonpath
