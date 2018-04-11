@@ -25,14 +25,18 @@ TorchNLP is a deep learning library for NLP tasks. Built on PyTorch and TorchTex
 * `BiLSTMTagger`: Sequence tagging model implemented using bidirectional LSTMs and CRF
 
 ## Installation
-TorchNLP requires a minimum of Python 3.5 and PyTorch 0.2.0 to run. Check [Pytorch](http://pytorch.org/) for the installation steps.
+TorchNLP requires a minimum of Python 3.5 and PyTorch 0.2.0 to run. Check [Pytorch](http://pytorch.org/) for the installation steps. 
 Clone this repository and install other dependencies like TorchText:
 ```
 pip install -r requirements.txt
 ```
-Check for integrity with PyTest:
+Go to the root of the project and check for integrity with PyTest:
 ```
 pytest
+```
+Install this project:
+```
+python setup.py
 ```
 
 ## Usage
@@ -40,7 +44,7 @@ TorchNLP is designed to be used inside the python interpreter to make it easier 
 
 **NER Task**
 
-The NER task can be run on any dataset that confirms to the [CoNLL 2003](https://www.clips.uantwerpen.be/conll2003/ner/) format. To use the CoNLL 2003 NER dataset place the dataset files in the following directory structure:
+The NER task can be run on any dataset that confirms to the [CoNLL 2003](https://www.clips.uantwerpen.be/conll2003/ner/) format. To use the CoNLL 2003 NER dataset place the dataset files in the following directory structure within your workspace root:
 ```
 .data
   |
@@ -99,6 +103,10 @@ It will display metrics like accuracy, sequence accuracy, F1 etc
 Run the trained model interactively:
 ```
 >>> interactive(TransformerTagger)
+...
+Ctrl+C to quit
+> Tom went to New York
+I-PER O O I-LOC I-LOC
 ```
 You can similarly train the bidirectional LSTM CRF model by using the `BiLSTMTagger` class.
 Customizing hyperparameters is quite straight forward. Let's look at the hyperparameters for `TransformerTagger`:
@@ -164,8 +172,17 @@ Hyperparameters:
  ```
  >>> train(TransformerTagger, conll2003, hparams=h2)
  ```
- Along with the model the hyperparameters are also saved so there is no need to pass the `HParams` object during evaluation. Also note that by default it will not overwrite any existing model directories (will rename instead). To change that behavior set the PREFS variable
+ Along with the model the hyperparameters are also saved so there is no need to pass the `HParams` object during evaluation. Also note that by default it will not overwrite any existing model directories (will rename instead). To change that behavior set the PREFS variable:
  ```
  >>> PREFS.overwrite_model_dir = True
  ```
  The `PREFS` variable is automatically persisted in `prefs.json`
+ 
+ ## Standalone Use
+ The `transformer.Encoder`, `transformer.Decoder` and `CRF` modules can be independently imported as they only depend on PyTorch:
+ ```
+ from torchnlp.modules.transformer import Encoder
+ from torchnlp.modules.transformer import Decoder
+ from torchnlp.modules.crf import CRF
+ ```
+Please refer to the comments within the source code for more details on the usage
