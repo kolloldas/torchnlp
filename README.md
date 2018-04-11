@@ -86,23 +86,23 @@ Available datasets:
 
 Train the [Transformer](https://arxiv.org/abs/1706.03762) model on the CoNLL 2003 dataset:
 ```
->>> train(TransformerTagger, conll2003)
+>>> train('ner-conll2003', TransformerTagger, conll2003)
 ```
-By default it will use the F1 metric with a window of 5 epochs to perform early stopping. To change the early stopping criteria set the `PREFS` global variable as follows:
+The first argument is the task name. You need to use the same task name during evaluation and inference. By default the train function will use the F1 metric with a window of 5 epochs to perform early stopping. To change the early stopping criteria set the `PREFS` global variable as follows:
 ```
 >>> PREFS.early_stopping='lowest_3_loss'
 ```
-This will now use validation loss as the stopping criteria with a window of 3 epochs. The model files are saved under *taskname-modelname* directory. In this case it is *conll2003.ner-TransformerTagger*
+This will now use validation loss as the stopping criteria with a window of 3 epochs. The model files are saved under *taskname-modelname* directory. In this case it is *ner-conll2003-TransformerTagger*
 
 Evaluate the trained model on the *testb* dataset split:
 ```
->>> evaluate(TransformerTagger, conll2003, 'test')
+>>> evaluate('ner-conll2003', TransformerTagger, conll2003, 'test')
 ```
 It will display metrics like accuracy, sequence accuracy, F1 etc
 
-Run the trained model interactively:
+Run the trained model interactively for the ner task:
 ```
->>> interactive(TransformerTagger)
+>>> interactive('ner-conll2003', TransformerTagger)
 ...
 Ctrl+C to quit
 > Tom went to New York
@@ -170,7 +170,7 @@ Hyperparameters:
  ```
  Use it to re-train the model:
  ```
- >>> train(TransformerTagger, conll2003, hparams=h2)
+ >>> train('ner-conll2003-nocrf', TransformerTagger, conll2003, hparams=h2)
  ```
  Along with the model the hyperparameters are also saved so there is no need to pass the `HParams` object during evaluation. Also note that by default it will not overwrite any existing model directories (will rename instead). To change that behavior set the PREFS variable:
  ```
