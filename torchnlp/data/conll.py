@@ -8,6 +8,7 @@ from torchtext import datasets
 from torchtext.vocab import Vectors, GloVe, CharNGram
 
 import numpy as np
+import random
 import logging
 logger = logging.getLogger(__name__)
 
@@ -51,6 +52,36 @@ class SequenceTaggingDataset(data.Dataset):
         super(SequenceTaggingDataset, self).__init__(examples, fields,
                                                      **kwargs)
 
+class CoNLL2000ChunkingDataset(SequenceTaggingDataset):
+    # CoNLL 2000 Chunking Dataset
+    # https://www.clips.uantwerpen.be/conll2000/chunking/
+    urls = ['https://www.clips.uantwerpen.be/conll2000/chunking/train.txt.gz',
+            'https://www.clips.uantwerpen.be/conll2000/chunking/test.txt.gz']
+    dirname = ''
+    name = 'conll2000'
+
+    @classmethod
+    def splits(cls, fields, root=".data", train="train.txt",
+               test="test.txt", **kwargs):
+        """Downloads and loads the CoNLL 2000 Chunking dataset. 
+        NOTE: There is only a train and test dataset so we split the test
+              dataset into validation and test
+        """
+
+        train, test = super(CoNLL2000ChunkingDataset, cls).splits(
+            fields=fields, root=root, train=train,
+            test=test, **kwargs)
+
+        # Now split the test set
+        # To make the split deterministic
+        random.seed(0)
+        val, test = test.split(0.5, random_state=random.getstate())
+        # Reset the seed
+        random.seed()
+
+        return train, val, test
+        
+
 def conll2003_dataset(tag_type, batch_size, root='./conll2003', 
                           train_file='eng.train.txt', 
                           validation_file='eng.testa.txt',
@@ -63,6 +94,7 @@ def conll2003_dataset(tag_type, batch_size, root='./conll2003',
     Parameters:
         tag_type: Type of tag to pick as task [pos, chunk, ner]
         batch_size: Batch size to return from iterator
+        root: Dataset root directory
         train_file: Train filename
         validation_file: Validation filename
         test_file: Test filename
@@ -129,3 +161,88 @@ def conll2003_dataset(tag_type, batch_size, root='./conll2003',
         }
     
 
+def conll2000_dataset(batch_size, use_local=False, root='.data/conll2000',
+                            train_file='train.txt',
+                            test_file='test.txt',
+                            convert_digits=True):
+    """
+    conll2000: Conll 2000 Local (Chunking)
+    Extract Conll2000 Chunking dataset using torchtext. By default will fetch
+    data files from online repository.
+    Applies GloVe 6B.200d and Char N-gram pretrained vectors. Also sets 
+    up per word character Field
+    Parameters:
+        batch_size: Batch size to return from iterator
+        use_local: If True use local provided files (default False)
+        root (optional): Dataset root directory (needed only if use_local is True)
+        train_file (optional): Train filename (needed only if use_local is True)
+        test_file (optional): Test filename (needed only if use_local is True)
+        convert_digits (optional): If True will convert numbers to single 0's
+    NOTE: Since there is only a train and test set we split the test set equally
+    into a test and validation set
+    Returns:
+        A dict containing:
+            task: 'conll2000.' + tag_type
+            iters: (train iter, validation iter, None)
+            vocabs: (Inputs word vocabulary, Inputs character vocabulary, 
+                    Tag vocabulary )
+    """
+    
+    # Setup fields with batch dimension first
+    inputs_word = data.Field(init_token="<bos>", eos_token="<eos>", batch_first=True, lower=True,
+                                preprocessing=data.Pipeline(
+                                    lambda w: '0' if convert_digits and w.isdigit() else w ))
+
+    inputs_char_nesting = data.Field(tokenize=list, init_token="<bos>", eos_token="<eos>", 
+                                    batch_first=True)
+
+    inputs_char = data.NestedField(inputs_char_nesting, 
+                                    init_token="<bos>", eos_token="<eos>")
+                        
+
+    labels = data.Field(init_token="<bos>", eos_token="<eos>", batch_first=True)
+
+    fields = [(('inputs_word', 'inputs_char'), (inputs_word, inputs_char)),
+                (None, None), ('labels', labels)]
+
+    if use_local:
+        # Load the data
+        train, test = SequenceTaggingDataset.splits(
+                                    path=root, 
+                                    train=train_file,
+                                    test=test_file,
+                                    fields=tuple(fields))
+
+        # To make the split deterministic
+        random.seed(0)
+        val, test = test.split(0.5, random_state=random.getstate())
+        # Reset the seed
+        random.seed()
+    else:
+        train, val, test = CoNLL2000ChunkingDataset.splits(fields=tuple(fields))
+
+    logger.info('---------- CONLL 2000 Chunking ---------')
+    logger.info('Train size: %d'%(len(train)))
+    logger.info('Validation size: %d'%(len(val)))
+    logger.info('Test size: %d'%(len(test)))
+    
+    # Build vocab
+    inputs_char.build_vocab(train.inputs_char, val.inputs_char, test.inputs_char)
+    inputs_word.build_vocab(train.inputs_word, val.inputs_word, test.inputs_word, max_size=50000,
+                        vectors=[GloVe(name='6B', dim='200'), CharNGram()])
+    
+    labels.build_vocab(train.labels)
+    logger.info('Input vocab size:%d'%(len(inputs_word.vocab)))
+    logger.info('Tagset size: %d'%(len(labels.vocab)))
+
+    # Get iterators
+    train_iter, val_iter, test_iter = data.BucketIterator.splits(
+                            (train, val, test), batch_size=batch_size, 
+                            device=0 if torch.cuda.is_available() else -1)
+    train_iter.repeat = False
+    
+    return {
+        'task': 'conll2000.chunk',
+        'iters': (train_iter, val_iter, test_iter), 
+        'vocabs': (inputs_word.vocab, inputs_char.vocab, labels.vocab) 
+        }
