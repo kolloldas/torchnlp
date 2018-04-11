@@ -81,20 +81,3 @@ class TransformerTagger(Tagger):
 
         return enc_out
 
-def hparams_transformer_ner():
-    hparams = hparams_tagging_base()
-    return hparams.update(
-        embedding_size_char=16,
-        embedding_size_char_per_word=100,
-        num_heads=4,
-        attention_key_channels=0, # Take hidden size
-        attention_value_channels=0, # Take hidden size
-        filter_size = 128,
-        filter_size_char = 64,
-        input_dropout=0.2,
-        attention_dropout=0.2,
-        relu_dropout=0.2,
-        learning_rate_decay='noam_step',
-        learning_rate_warmup_steps=500,
-        use_crf=True
-    )
