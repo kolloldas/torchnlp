@@ -74,7 +74,7 @@ def hparams_lstm_chunk():
         hidden_size=100,
         learning_rate=0.05,
         learning_rate_decay='noam_step',
-        learning_rate_warmup_steps=100
+        learning_rate_warmup_steps=100,
         dropout=0.5,
         use_crf=True
     )
