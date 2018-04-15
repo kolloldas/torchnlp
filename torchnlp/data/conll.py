@@ -73,17 +73,17 @@ class CoNLL2000ChunkingDataset(SequenceTaggingDataset):
             test=test, **kwargs)
 
         # HACK: Saving the sort key function as the split() call removes it
-        sort_key = test.sort_key
+        sort_key = train.sort_key
 
         # Now split the test set
         # To make the split deterministic
         random.seed(0)
-        val, test = test.split(0.5, random_state=random.getstate())
+        train, val = train.split(0.92, random_state=random.getstate())
         # Reset the seed
         random.seed()
 
         # HACK: Set the sort key
-        test.sort_key = sort_key
+        train.sort_key = sort_key
         val.sort_key = sort_key
 
         return train, val, test
@@ -185,8 +185,8 @@ def conll2000_dataset(batch_size, use_local=False, root='.data/conll2000',
         train_file (optional): Train filename (needed only if use_local is True)
         test_file (optional): Test filename (needed only if use_local is True)
         convert_digits (optional): If True will convert numbers to single 0's
-    NOTE: Since there is only a train and test set we split the test set equally
-    into a test and validation set
+    NOTE: Since there is only a train and test set we use 8% of the train set as
+        validation
     Returns:
         A dict containing:
             task: 'conll2000.' + tag_type
@@ -221,15 +221,15 @@ def conll2000_dataset(batch_size, use_local=False, root='.data/conll2000',
                                     fields=tuple(fields))
 
         # HACK: Saving the sort key function as the split() call removes it
-        sort_key = test.sort_key
+        sort_key = train.sort_key
         # To make the split deterministic
         random.seed(0)
-        val, test = test.split(0.5, random_state=random.getstate())
+        train, val = train.split(0.92, random_state=random.getstate())
         # Reset the seed
         random.seed()
 
         # HACK: Set the sort key
-        test.sort_key = sort_key
+        train.sort_key = sort_key
         val.sort_key = sort_key
     else:
         train, val, test = CoNLL2000ChunkingDataset.splits(fields=tuple(fields))
