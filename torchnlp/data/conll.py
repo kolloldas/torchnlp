@@ -4,7 +4,7 @@ from __future__ import print_function
 
 import torch
 from torchtext import data
-from torchtext import datasets
+from torchtext.datasets import SequenceTaggingDataset, CoNLL2000Chunking
 from torchtext.vocab import Vectors, GloVe, CharNGram
 
 import numpy as np
@@ -12,82 +12,6 @@ import random
 import logging
 logger = logging.getLogger(__name__)
 
-# Temporary class till datasets.SequenceTaggingDataset supports specifying a separator
-class SequenceTaggingDataset(data.Dataset):
-    """Defines a dataset for sequence tagging. Examples in this dataset
-    contain paired lists -- paired list of words and tags.
-    For example, in the case of part-of-speech tagging, an example is of the
-    form
-    [I, love, PyTorch, .] paired with [PRON, VERB, PROPN, PUNCT]
-    See torchtext/test/sequence_tagging.py on how to use this class.
-    """
-
-    @staticmethod
-    def sort_key(example):
-        for attr in dir(example):
-            if not callable(getattr(example, attr)) and \
-                    not attr.startswith("__"):
-                return len(getattr(example, attr))
-        return 0
-
-    def __init__(self, path, fields, separator=' ', **kwargs):
-        examples = []
-        columns = []
-
-        with open(path) as input_file:
-            for line in input_file:
-                line = line.strip()
-                if line == "":
-                    if columns:
-                        examples.append(data.Example.fromlist(columns, fields))
-                    columns = []
-                else:
-                    for i, column in enumerate(line.split(separator)):
-                        if len(columns) < i + 1:
-                            columns.append([])
-                        columns[i].append(column)
-
-            if columns:
-                examples.append(data.Example.fromlist(columns, fields))
-        super(SequenceTaggingDataset, self).__init__(examples, fields,
-                                                     **kwargs)
-
-class CoNLL2000ChunkingDataset(SequenceTaggingDataset):
-    # CoNLL 2000 Chunking Dataset
-    # https://www.clips.uantwerpen.be/conll2000/chunking/
-    urls = ['https://www.clips.uantwerpen.be/conll2000/chunking/train.txt.gz',
-            'https://www.clips.uantwerpen.be/conll2000/chunking/test.txt.gz']
-    dirname = ''
-    name = 'conll2000'
-
-    @classmethod
-    def splits(cls, fields, root=".data", train="train.txt",
-               test="test.txt", **kwargs):
-        """Downloads and loads the CoNLL 2000 Chunking dataset. 
-        NOTE: There is only a train and test dataset so we split the test
-              dataset into validation and test
-        """
-
-        train, test = super(CoNLL2000ChunkingDataset, cls).splits(
-            fields=fields, root=root, train=train,
-            test=test, **kwargs)
-
-        # HACK: Saving the sort key function as the split() call removes it
-        sort_key = train.sort_key
-
-        # Now split the test set
-        # To make the split deterministic
-        random.seed(0)
-        train, val = train.split(0.92, random_state=random.getstate())
-        # Reset the seed
-        random.seed()
-
-        # HACK: Set the sort key
-        train.sort_key = sort_key
-        val.sort_key = sort_key
-
-        return train, val, test
-        
 
 def conll2003_dataset(tag_type, batch_size, root='./conll2003', 
                           train_file='eng.train.txt', 
@@ -171,9 +95,10 @@ def conll2003_dataset(tag_type, batch_size, root='./conll2003',
 def conll2000_dataset(batch_size, use_local=False, root='.data/conll2000',
                             train_file='train.txt',
                             test_file='test.txt',
+                            validation_frac=0.1,
                             convert_digits=True):
     """
-    conll2000: Conll 2000 Local (Chunking)
+    conll2000: Conll 2000 (Chunking)
     Extract Conll2000 Chunking dataset using torchtext. By default will fetch
     data files from online repository.
     Applies GloVe 6B.200d and Char N-gram pretrained vectors. Also sets 
@@ -184,8 +109,9 @@ def conll2000_dataset(batch_size, use_local=False, root='.data/conll2000',
         root (optional): Dataset root directory (needed only if use_local is True)
         train_file (optional): Train filename (needed only if use_local is True)
         test_file (optional): Test filename (needed only if use_local is True)
+        validation_frac (optional): Fraction of train dataset to use for validation
         convert_digits (optional): If True will convert numbers to single 0's
-    NOTE: Since there is only a train and test set we use 8% of the train set as
+    NOTE: Since there is only a train and test set we use 10% of the train set as
         validation
     Returns:
         A dict containing:
@@ -224,7 +150,7 @@ def conll2000_dataset(batch_size, use_local=False, root='.data/conll2000',
         sort_key = train.sort_key
         # To make the split deterministic
         random.seed(0)
-        train, val = train.split(0.92, random_state=random.getstate())
+        train, val = train.split(1 - validation_frac, random_state=random.getstate())
         # Reset the seed
         random.seed()
 
@@ -232,7 +158,8 @@ def conll2000_dataset(batch_size, use_local=False, root='.data/conll2000',
         train.sort_key = sort_key
         val.sort_key = sort_key
     else:
-        train, val, test = CoNLL2000ChunkingDataset.splits(fields=tuple(fields))
+        train, val, test = CoNLL2000Chunking.splits(fields=tuple(fields), 
+                                                    validation_frac=validation_frac)
 
     logger.info('---------- CONLL 2000 Chunking ---------')
     logger.info('Train size: %d'%(len(train)))

@@ -29,7 +29,6 @@ Info(__doc__).models(TransformerTagger, BiLSTMTagger).datasets(conll2000_dataset
 
 PREFS.defaults(
     data_root='./.data/conll2000',
-    use_local=True,
     data_train='train.txt',
     data_test='test.txt',
     early_stopping='highest_5_F1'
@@ -39,7 +38,6 @@ PREFS.defaults(
 # Default dataset is Conll2003
 conll2000 = partial(conll2000_dataset, hparams_tagging_base().batch_size,  
                                     root=PREFS.data_root,
-                                    use_local=PREFS.use_local,
                                     train_file=PREFS.data_train,
                                     test_file=PREFS.data_test)
 
