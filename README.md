@@ -1,5 +1,5 @@
 # TorchNLP
-TorchNLP is a deep learning library for NLP tasks. Built on PyTorch and TorchText, it is an attempt to provide reusable components that work across tasks. Currently it can be used for the Named Entity Recognition (NER) task with a Bidirectional LSTM CRF model and a Transformer network model. It can support any dataset which uses the [CoNLL 2003 format](https://www.clips.uantwerpen.be/conll2003/ner/). More tasks will be added shortly
+TorchNLP is a deep learning library for NLP tasks. Built on PyTorch and TorchText, it is an attempt to provide reusable components that work across tasks. Currently it can be used for Named Entity Recognition (NER) and Chunking tasks with a Bidirectional LSTM CRF model and a Transformer network model. It can support any dataset which uses the [CoNLL 2003 format](https://www.clips.uantwerpen.be/conll2003/ner/). More tasks will be added shortly
 
 ## High Level Workflow
 1. Define the NLP task
@@ -178,6 +178,25 @@ Hyperparameters:
  ```
  The `PREFS` variable is automatically persisted in `prefs.json`
  
+ **Chunking Task**
+ 
+ The [CoNLL 2000](https://www.clips.uantwerpen.be/conll2000/chunking/) dataset is available for the Chunking task. The dataset is automatically downloaded from the public repository so you don't need to manually download it.
+
+Start the Chunking task:
+```
+python -i -m torchnlp.chunk
+```
+Train the [Transformer](https://arxiv.org/abs/1706.03762) model:
+```
+>>> train('chunk-conll2000', TransformerTagger, conll2000)
+```
+There is no validation partition provided in the repository hence 10% of the training set is used for validation.
+
+Evaluate the model on the test set:
+```
+>>> evaluate('chunk-conll2000', TransformerTagger, conll2000, 'test')
+```
+
  ## Standalone Use
  The `transformer.Encoder`, `transformer.Decoder` and `CRF` modules can be independently imported as they only depend on PyTorch:
  ```
