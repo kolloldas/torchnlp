@@ -10,6 +10,7 @@ import torch
 
 from .common.hparams import HParams
 from .data.conll import conll2003_dataset
+from .data.nyt import nyt_ingredients_ner_dataset
 from .tasks.sequence_tagging import TransformerTagger
 from .tasks.sequence_tagging import BiLSTMTagger
 from .tasks.sequence_tagging import hparams_tagging_base
@@ -25,7 +26,7 @@ from functools import partial
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
 
-Info(__doc__).models(TransformerTagger, BiLSTMTagger).datasets(conll2003_dataset)
+Info(__doc__).models(TransformerTagger, BiLSTMTagger).datasets(conll2003_dataset, nyt_ingredients_ner_dataset)
 
 PREFS.defaults(
     data_root='./.data/conll2003',
@@ -42,6 +43,8 @@ conll2003 = partial(conll2003_dataset, 'ner',  hparams_tagging_base().batch_size
                                     train_file=PREFS.data_train,
                                     validation_file=PREFS.data_validation,
                                     test_file=PREFS.data_test)
+
+nyt_ingredients_ner = partial(nyt_ingredients_ner_dataset, hparams_tagging_base().batch_size)                                  
 
 # Hyperparameter configuration for NER tasks
 
