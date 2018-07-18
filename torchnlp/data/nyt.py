@@ -12,7 +12,28 @@ import random
 import logging
 logger = logging.getLogger(__name__)
 
-def nyt_ingredients_ner_dataset(batch_size, use_local=True, root='.data/nyt_ingredients_ner', 
+class Ingredients(SequenceTaggingDataset):
+
+    # New York Times ingredients dataset
+    # Download original at https://github.com/NYTimes/ingredient-phrase-tagger
+    
+    urls = ['https://raw.githubusercontent.com/kolloldas/torchnlp/master/data/nyt/nyt_ingredients_ner.zip']
+    dirname = ''
+    name = 'nyt_ingredients_ner'
+
+    @classmethod
+    def splits(cls, fields, root=".data", train="train.txt",
+               validation="valid.txt",
+               test="test.txt", **kwargs):
+        """Downloads and loads the NYT ingredients NER data in CoNLL format
+        """
+
+        return super(Ingredients, cls).splits(
+            fields=fields, root=root, train=train, validation=validation,
+            test=test, **kwargs)
+
+
+def nyt_ingredients_ner_dataset(batch_size, use_local=False, root='.data/nyt_ingredients_ner', 
                           train_file='train.txt', 
                           validation_file='valid.txt',
                           test_file='test.txt',
@@ -56,12 +77,15 @@ def nyt_ingredients_ner_dataset(batch_size, use_local=True, root='.data/nyt_ingr
                 ('labels', labels)])
 
     # Load the data
-    train, val, test = SequenceTaggingDataset.splits(
-                                path=root, 
-                                train=train_file, 
-                                validation=validation_file, 
-                                test=test_file,
-                                fields=tuple(fields))
+    if use_local:
+        train, val, test = SequenceTaggingDataset.splits(
+                                    path=root, 
+                                    train=train_file, 
+                                    validation=validation_file, 
+                                    test=test_file,
+                                    fields=tuple(fields))
+    else:
+        train, val, test = Ingredients.splits(fields=tuple(fields))
 
     logger.info('---------- NYT INGREDIENTS NER ---------')
     logger.info('Train size: %d'%(len(train)))
