@@ -43,8 +43,9 @@ def test_tagger(tmpdir):
     tmpdir.chdir()
     hparams = hparams_tagging_base()
     train_iter, val_iter, test_iter, inputs, tags = udpos_dataset(hparams.batch_size)
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-    tagger = DummyTagger(hparams=hparams, vocabs=(inputs.vocab, None, tags.vocab))
+    tagger = DummyTagger(hparams=hparams, vocabs=(inputs.vocab, None, tags.vocab)).to(device)
     assert tagger.embedding_word.weight.shape == (len(inputs.vocab), hparams.embedding_size_word)
     assert tagger.output_layer.output_projection.weight.shape == (len(tags.vocab), hparams.hidden_size)
 
