@@ -63,6 +63,7 @@ def conll2003_dataset(tag_type, batch_size, root='./conll2003',
                                 train=train_file, 
                                 validation=validation_file, 
                                 test=test_file,
+                                separator=' ',
                                 fields=tuple(fields))
 
     logger.info('---------- CONLL 2003 %s ---------'%tag_type)
