@@ -51,7 +51,6 @@ def get_input_processor_words(vocab_word, vocab_char=None, convert_digits=True):
         # Entire input in one batch
         return data.Batch(data=dataset, 
                           dataset=dataset,
-                          device=0 if torch.cuda.is_available() else -1,
-                          train=False)
+                          device=torch.device("cuda:0" if torch.cuda.is_available() else "cpu"))
 
     return input_processor_fn

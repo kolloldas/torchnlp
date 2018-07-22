@@ -176,7 +176,7 @@ class Trainer(object):
                 if self.lr_scheduler_step:
                     self.lr_scheduler_step.step()
 
-                epoch_loss += loss.data[0]
+                epoch_loss += loss.item()
                 count += 1
                 self.model.iterations += 1
 

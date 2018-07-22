@@ -5,7 +5,6 @@ from __future__ import print_function
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from torch.autograd import Variable
 
 import numpy as np
 
@@ -94,7 +93,7 @@ class MultiHeadAttention(nn.Module):
         
         # Add bias to mask future values
         if self.bias_mask is not None:
-            logits += Variable(self.bias_mask[:, :, :logits.shape[-2], :logits.shape[-1]].type_as(logits.data))
+            logits += self.bias_mask[:, :, :logits.shape[-2], :logits.shape[-1]].type_as(logits.data)
         
         # Convert to probabilites
         weights = nn.functional.softmax(logits, dim=-1)

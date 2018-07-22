@@ -66,7 +66,7 @@ def xavier_uniform_init(m):
     Xavier initializer to be used with model.apply
     """
     if type(m) == nn.Linear: # TODO: Add Embeddings?
-        nn.init.xavier_uniform(m.weight.data)
+        nn.init.xavier_uniform_(m.weight.data)
 
 class Model(nn.Module):
     """

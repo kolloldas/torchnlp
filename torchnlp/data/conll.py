@@ -82,7 +82,7 @@ def conll2003_dataset(tag_type, batch_size, root='./conll2003',
     # Get iterators
     train_iter, val_iter, test_iter = data.BucketIterator.splits(
                             (train, val, test), batch_size=batch_size, 
-                            device=0 if torch.cuda.is_available() else -1)
+                            device=torch.device("cuda:0" if torch.cuda.is_available() else "cpu"))
     train_iter.repeat = False
     
     return {
@@ -178,7 +178,7 @@ def conll2000_dataset(batch_size, use_local=False, root='.data/conll2000',
     # Get iterators
     train_iter, val_iter, test_iter = data.BucketIterator.splits(
                             (train, val, test), batch_size=batch_size, 
-                            device=0 if torch.cuda.is_available() else -1)
+                            device=torch.device("cuda:0" if torch.cuda.is_available() else "cpu"))
     train_iter.repeat = False
     
     return {

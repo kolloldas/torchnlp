@@ -5,7 +5,6 @@ from __future__ import print_function
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from torch.autograd import Variable
 
 import numpy as np
 import math
@@ -102,7 +101,7 @@ class Encoder(nn.Module):
         x = self.embedding_proj(x)
         
         # Add timing signal
-        x += Variable(self.timing_signal[:, :inputs.shape[1], :].type_as(inputs.data))
+        x += self.timing_signal[:, :inputs.shape[1], :].type_as(inputs.data)
         
         y = self.enc(x)
         
@@ -165,7 +164,7 @@ class Decoder(nn.Module):
         x = self.embedding_proj(x)
         
         # Add timing signal
-        x += Variable(self.timing_signal[:, :inputs.shape[1], :].type_as(inputs.data))
+        x += self.timing_signal[:, :inputs.shape[1], :].type_as(inputs.data)
         
         # Run decoder
         y, _ = self.dec((x, encoder_output))
@@ -173,28 +172,3 @@ class Decoder(nn.Module):
         # Final layer normalization
         y = self.layer_norm(y)
         return y
-
-
-
-
-def check_encoder():
-    enc = Encoder(16, 32, 2, 4, 64, 32, 64)
-    t = Variable(torch.randn(10, 5, 16))
-    output = enc(t)
-    assert (10, 5, 32) == output.shape, "check_encoder() failed"
-    print(output.shape)
-
-def check_decoder():
-    enc = Encoder(16, 32, 2, 4, 64, 32, 64)
-    te = Variable(torch.randn(10, 7, 16))
-    enc_output = enc(te)
-
-    dec = Decoder(8, 32, 2, 4, 64, 32, 64)
-    td = Variable(torch.randn(10, 5, 8))
-    dec_output = dec(td, enc_output)
-    assert (10, 5, 32) == dec_output.shape, "check_decoder() failed"
-    print(dec_output.shape)
-
-if __name__ == "__main__":
-    check_encoder()
-    check_decoder()

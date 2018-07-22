@@ -5,7 +5,6 @@ from __future__ import print_function
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from torch.autograd import Variable
 
 class CRF(nn.Module):
     """
@@ -20,7 +19,7 @@ class CRF(nn.Module):
         self.start_transitions = nn.Parameter(torch.randn(num_tags))
         self.stop_transitions = nn.Parameter(torch.randn(num_tags))
 
-        nn.init.xavier_normal(self.transitions)
+        nn.init.xavier_normal_(self.transitions)
 
     def forward(self, feats):
         # Shape checks

@@ -104,7 +104,7 @@ def nyt_ingredients_ner_dataset(batch_size, use_local=False, root='.data/nyt_ing
     # Get iterators
     train_iter, val_iter, test_iter = data.BucketIterator.splits(
                             (train, val, test), batch_size=batch_size, 
-                            device=0 if torch.cuda.is_available() else -1)
+                            device=torch.device("cuda:0" if torch.cuda.is_available() else "cpu"))
     train_iter.repeat = False
     
     return {

@@ -2,7 +2,6 @@ from torchnlp.tasks.sequence_tagging import Tagger, hparams_tagging_base, VOCABS
 
 import torch
 import torch.nn as nn
-from torch.autograd import Variable
 
 import torchtext
 from torchtext import data
@@ -26,7 +25,7 @@ def udpos_dataset(batch_size):
     # Get iterators
     train_iter, val_iter, test_iter = data.BucketIterator.splits(
                             (train, val, test), batch_size=batch_size, 
-                            device=0 if torch.cuda.is_available() else -1)
+                            device=torch.device("cuda:0" if torch.cuda.is_available() else "cpu"))
     train_iter.repeat = False
     return train_iter, val_iter, test_iter, inputs, tags
 
@@ -52,9 +51,7 @@ def test_tagger(tmpdir):
     batch = next(iter(val_iter))
     loss, preds = tagger.loss(batch, compute_predictions=True)
 
-    assert isinstance(loss, Variable)
-    assert loss.data.shape[0] == 1
-    assert isinstance(preds, Variable)
+    assert loss > 0
     assert preds.data.shape == batch.labels.data.shape
 
 @pytest.mark.slow

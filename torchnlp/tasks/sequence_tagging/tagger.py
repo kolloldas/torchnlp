@@ -82,8 +82,11 @@ class Tagger(Model):
         NOTE: batch must have the following attributes:
             inputs_word, inputs_char, labels
         """
-        hidden = self._embed_compute(batch)
-        return self.output_layer(hidden)
+        with torch.no_grad():
+            hidden = self._embed_compute(batch)
+            output = self.output_layer(hidden)
+
+        return output
 
         # TODO: Add beam search somewhere :)
         

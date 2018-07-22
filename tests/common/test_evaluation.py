@@ -4,12 +4,11 @@ from torchnlp.common.model import Model
 from torchnlp.common.hparams import HParams
 
 import torch
-from torch.autograd import Variable
 
 
 class DummyModel(Model):
     def loss(self, batch, compute_predictions=False):
-        return Variable(torch.FloatTensor([1])), 10
+        return torch.FloatTensor([1]), 10
 
 class DummyMetrics(Metrics):
     def __init__(self, mul):
@@ -119,13 +118,13 @@ def test_basic_metrics():
 
     class Batch(object):
         def __init__(self):
-            self.labels = Variable(torch.LongTensor([[0, 1, 2], [0, 0, 3], 
-                                                     [0, 0, 0], [1, 1, 1]]))
+            self.labels = torch.LongTensor([[0, 1, 2], [0, 0, 3], 
+                                                     [0, 0, 0], [1, 1, 1]])
 
-    predictions_1 = Variable(torch.LongTensor([[0, 1, 2], [0, 0, 3], 
-                                               [0, 0, 0], [1, 1, 1]]))
+    predictions_1 = torch.LongTensor([[0, 1, 2], [0, 0, 3], 
+                                               [0, 0, 0], [1, 1, 1]])
 
-    loss = Variable(torch.FloatTensor([0]))
+    loss = torch.FloatTensor([0])
 
     basic = BasicMetrics(Vocab())
     basic.reset()
@@ -136,8 +135,8 @@ def test_basic_metrics():
     assert result['acc'] == 1
     assert result['acc-seq'] == 1
 
-    predictions_2 = Variable(torch.LongTensor([[0, 1, 0], [0, 0, 0], 
-                                               [0, 0, 0], [1, 1, 1]]))
+    predictions_2 = torch.LongTensor([[0, 1, 0], [0, 0, 0], 
+                                               [0, 0, 0], [1, 1, 1]])
     basic.reset()
     basic.evaluate(Batch(), loss, predictions_2)
     result = basic.results(0)
@@ -146,8 +145,8 @@ def test_basic_metrics():
     assert result['acc'] == 1
     assert result['acc-seq'] == 0.5
 
-    predictions_3 = Variable(torch.LongTensor([[0, 0, 0], [0, 0, 0], 
-                                               [1, 0, 0], [1, 1, 1]]))
+    predictions_3 = torch.LongTensor([[0, 0, 0], [0, 0, 0], 
+                                    [1, 0, 0], [1, 1, 1]])
     basic.reset()
     basic.evaluate(Batch(), loss, predictions_3)
     result = basic.results(0)
@@ -165,14 +164,14 @@ def test_iob_metrics():
 
     class Batch(object):
         def __init__(self):
-            self.labels = Variable(torch.LongTensor([[0, 1, 6], [0, 0, 1], 
-                                                     [0, 2, 3], [6, 6, 6]]))
+            self.labels = torch.LongTensor([[0, 1, 6], [0, 0, 1], 
+                                            [0, 2, 3], [6, 6, 6]])
 
     # All Correct
-    predictions_1 = Variable(torch.LongTensor([[0, 1, 6], [0, 0, 1], 
-                                                     [0, 2, 3], [6, 6, 6]]))
+    predictions_1 = torch.LongTensor([[0, 1, 6], [0, 0, 1], 
+                                    [0, 2, 3], [6, 6, 6]])
 
-    loss = Variable(torch.FloatTensor([0]))
+    loss = torch.FloatTensor([0])
 
     iob = IOBMetrics(Vocab())
     iob.reset()
@@ -187,10 +186,10 @@ def test_iob_metrics():
     assert result['F1'] == 1
 
     # Ignore anything not B/I
-    predictions_2 = Variable(torch.LongTensor([[0, 1, 6], [0, 0, 1], 
-                                                     [0, 2, 3], [9, 9, 9]]))
+    predictions_2 = torch.LongTensor([[0, 1, 6], [0, 0, 1], 
+                                    [0, 2, 3], [9, 9, 9]])
 
-    loss = Variable(torch.FloatTensor([0]))
+    loss = torch.FloatTensor([0])
 
     iob = IOBMetrics(Vocab())
     iob.reset()
@@ -202,10 +201,10 @@ def test_iob_metrics():
     assert result['F1'] == 1
 
     # Lower precision/F1
-    predictions_3 = Variable(torch.LongTensor([[0, 0, 10], [0, 0, 1], 
-                                                     [0, 2, 3], [0, 0, 9]]))
+    predictions_3 = torch.LongTensor([[0, 0, 10], [0, 0, 1], 
+                                        [0, 2, 3], [0, 0, 9]])
 
-    loss = Variable(torch.FloatTensor([0]))
+    loss = torch.FloatTensor([0])
 
     iob = IOBMetrics(Vocab())
     iob.reset()

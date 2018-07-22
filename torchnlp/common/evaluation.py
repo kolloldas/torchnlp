@@ -34,20 +34,21 @@ class Evaluator(object):
         total_loss = 0
 
         prog_iter = tqdm(self.data_iter, leave=False)
-        for batch in prog_iter:
-            loss, predictions = model.loss(batch, compute_predictions=True)
-            for m in self.metrics:
-                m.evaluate(batch, loss, predictions)
-            total_loss += float(loss)
+        with torch.no_grad():
+            for batch in prog_iter:
+                loss, predictions = model.loss(batch, compute_predictions=True)
+                for m in self.metrics:
+                    m.evaluate(batch, loss, predictions)
+                total_loss += float(loss)
+                
+                prog_iter.set_description('Evaluating')
             
-            prog_iter.set_description('Evaluating')
-        
-        results = {'loss': total_loss/len(self.data_iter)}
-        for m in self.metrics:
-            r = m.results(total_loss)
-            if not isinstance(r, dict):
-                raise ValueError('{}.results() should return a dict containing metrics'.format(m.__class__.__name__))
-            results.update(r)
+            results = {'loss': total_loss/len(self.data_iter)}
+            for m in self.metrics:
+                r = m.results(total_loss)
+                if not isinstance(r, dict):
+                    raise ValueError('{}.results() should return a dict containing metrics'.format(m.__class__.__name__))
+                results.update(r)
 
         return results
 

@@ -2,7 +2,6 @@ from torchnlp.modules.crf import CRF
 
 import torch
 import torch.nn as nn
-from torch.autograd import Variable
 
 import numpy as np
 
@@ -21,7 +20,7 @@ def test_sequence_score():
         1, 1, 1
     ]))
 
-    feats = Variable(torch.Tensor([
+    feats = torch.Tensor([
         [
             [0, 0, 1],
             [1, 1, 1],
@@ -31,24 +30,24 @@ def test_sequence_score():
             [0, 0, 2],
             [0, 1, 0],
             [1, 1, 1]
-        ]]))
-    tags = Variable(torch.LongTensor([
+        ]])
+    tags = torch.LongTensor([
         [0, 1, 2],
         [0, 2, 1]
-    ]))
+    ])
 
     scores = crf._sequence_score(feats, tags)
     assert scores.shape[0] == 2
 
-    feat_score = Variable(torch.Tensor([0+1+2, 0+0+1]))
-    trans_score = Variable(torch.Tensor([2+6, 3+8]))
-    start_score = Variable(torch.Tensor([2, 2]))
-    stop_score = Variable(torch.Tensor([1, 1]))
+    feat_score = torch.Tensor([0+1+2, 0+0+1])
+    trans_score = torch.Tensor([2+6, 3+8])
+    start_score = torch.Tensor([2, 2])
+    stop_score = torch.Tensor([1, 1])
 
     assert list(scores.data) == list((feat_score + trans_score + start_score + stop_score).data)
 
 def test_log_sum_exp():
-    logits = Variable(torch.Tensor([[1, 2, 3], [4, 5, 6]]))
+    logits = torch.Tensor([[1, 2, 3], [4, 5, 6]])
     crf = CRF(3)
     lse = crf._log_sum_exp(logits, -1)
     assert lse.shape[0] == 2
@@ -69,7 +68,7 @@ def test_partition_function():
         1, 1, 1
     ]))
 
-    feats = Variable(torch.Tensor([
+    feats = torch.Tensor([
         [
             [0, 0, 1],
             [1, 1, 1],
@@ -79,7 +78,7 @@ def test_partition_function():
             [0, 0, 2],
             [0, 1, 0],
             [1, 1, 1]
-        ]]))
+        ]])
     
     # Monkey patch _log_sum_exp
     crf._log_sum_exp = lambda logits, dim: logits.sum(dim)
@@ -114,7 +113,7 @@ def test_viterbi():
         1, 1, 1
     ]))
 
-    feats = Variable(torch.Tensor([
+    feats = torch.Tensor([
         [
             [0, 0, 1],
             [1, 1, 1],
@@ -124,7 +123,7 @@ def test_viterbi():
             [0, 0, 2],
             [0, 1, 0],
             [1, 1, 1]
-        ]]))
+        ]])
 
     tags = crf._viterbi(feats)
     """
