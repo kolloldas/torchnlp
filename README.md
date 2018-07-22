@@ -25,7 +25,7 @@ TorchNLP is a deep learning library for NLP tasks. Built on PyTorch and TorchTex
 * `BiLSTMTagger`: Sequence tagging model implemented using bidirectional LSTMs and CRF
 
 ## Installation
-TorchNLP requires a minimum of Python 3.5 and PyTorch 0.2.0 to run. Check [Pytorch](http://pytorch.org/) for the installation steps. 
+TorchNLP requires a minimum of Python 3.5 and PyTorch 0.4.0 to run. Check [Pytorch](http://pytorch.org/) for the installation steps. 
 Clone this repository and install other dependencies like TorchText:
 ```
 pip install -r requirements.txt
