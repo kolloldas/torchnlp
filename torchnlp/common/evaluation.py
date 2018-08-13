@@ -204,6 +204,7 @@ class IOBMetrics(Metrics):
             recall: Tag recall
             F1: Tag F1
         """
+        precision, recall, f1 = 0, 0, 0
         if self.correct_seg_count > 0:
             precision = self.correct_seg_count / self.pred_seg_count
             recall = self.correct_seg_count / self.total_seg_count
