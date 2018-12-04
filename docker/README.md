@@ -11,10 +11,10 @@ General installation instructions are
 * [OSX](https://www.docker.com/products/docker#/mac)
 * [Ubuntu](https://docs.docker.com/engine/installation/linux/ubuntulinux/)
 
-# Build docker image
+## Build docker image
 > docker build -t torchnlp:cuda9-cudnn7-py3 -f Dockerfile.gpu .
 
-# Run docker
+## Run docker
 
 For GPU support install NVidia drivers (ideally latest) and
 [nvidia-docker](https://github.com/NVIDIA/nvidia-docker). Run using
