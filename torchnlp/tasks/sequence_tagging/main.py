@@ -43,20 +43,23 @@ def train(task_name, model_cls, dataset_fn, hparams=None, hparams_map=None,
                         loss, acc, acc-seq, precision, recall, F1. Default is picked
                         from PREFS.early_stopping
     """
-    dataset = dataset_fn()
-    train_iter, validation_iter, _ = dataset['iters']
-    _, _, tag_vocab = dataset['vocabs']
-
     early_stopping=early_stopping or PREFS.early_stopping
 
     # Create or load the model
     if checkpoint is None:
         if hparams is None:
             hparams = hparams_map[model_cls]
+        dataset = dataset_fn(hparams.batch_size)
         model = model_cls.create(task_name, hparams, vocabs=dataset['vocabs'], 
                                 overwrite=PREFS.overwrite_model_dir)
     else:
-        model = model_cls.load(task_name, checkpoint)
+        model, hparams_loaded = model_cls.load(task_name, checkpoint)
+        if hparams is None:
+            hparams = hparams_loaded
+        dataset = dataset_fn(hparams.batch_size)
+    
+    train_iter, validation_iter, _ = dataset['iters']
+    _, _, tag_vocab = dataset['vocabs']
 
     metrics = [BasicMetrics(output_vocab=tag_vocab)]
     if use_iob_metrics:

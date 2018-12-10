@@ -38,13 +38,13 @@ PREFS.defaults(
 
 
 # Default dataset is Conll2003
-conll2003 = partial(conll2003_dataset, 'ner',  hparams_tagging_base().batch_size,  
+conll2003 = partial(conll2003_dataset, 'ner', 
                                     root=PREFS.data_root,
                                     train_file=PREFS.data_train,
                                     validation_file=PREFS.data_validation,
                                     test_file=PREFS.data_test)
 
-nyt_ingredients_ner = partial(nyt_ingredients_ner_dataset, hparams_tagging_base().batch_size)                                  
+nyt_ingredients_ner = partial(nyt_ingredients_ner_dataset)                                  
 
 # Hyperparameter configuration for NER tasks
 

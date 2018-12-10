@@ -155,7 +155,7 @@ class Model(nn.Module):
         # Load the model
         model.load_state_dict(torch.load(checkpoint_path))
 
-        return model
+        return model, hparams
 
     def save(self, task_name):
         """

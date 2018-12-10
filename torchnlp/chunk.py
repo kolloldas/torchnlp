@@ -36,7 +36,7 @@ PREFS.defaults(
 
 
 # Default dataset is Conll2000
-conll2000 = partial(conll2000_dataset, hparams_tagging_base().batch_size,  
+conll2000 = partial(conll2000_dataset, 
                                     root=PREFS.data_root,
                                     train_file=PREFS.data_train,
                                     test_file=PREFS.data_test)

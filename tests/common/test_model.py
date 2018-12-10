@@ -71,7 +71,7 @@ def test_load_model(tmpdir):
     torch.save(dummy_model.state_dict(), str(sub.join(CHECKPOINT_FILE.format(2))))
     assert sub.join(CHECKPOINT_FILE.format(2)).check()
 
-    model = DummyModel.load('test.Task', checkpoint=-1, extra=111)
+    model, _ = DummyModel.load('test.Task', checkpoint=-1, extra=111)
     assert isinstance(model, DummyModel)
     assert hasattr(model, 'hparams')
     assert model.hparams.test == 22

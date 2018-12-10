@@ -75,5 +75,5 @@ def test_tagger_load(tmpdir):
     tagger.iterations += 10
     tagger.save('test.Task')
 
-    tagger_load = DummyTagger.load('test.Task', checkpoint=-1)
+    tagger_load, _ = DummyTagger.load('test.Task', checkpoint=-1)
     assert isinstance(tagger_load.vocab_tags, torchtext.vocab.Vocab)
