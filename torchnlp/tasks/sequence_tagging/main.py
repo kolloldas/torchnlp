@@ -97,7 +97,7 @@ def evaluate(task_name, model_cls, dataset_fn, split, checkpoint=-1, use_iob_met
     dataset = dataset_fn()
     data_iter = dataset['iters'][iter_map[split]]
 
-    model = model_cls.load(task_name, checkpoint)
+    model, hparams = model_cls.load(task_name, checkpoint)
 
     metrics = [BasicMetrics(output_vocab=model.vocab_tags)]
     if use_iob_metrics:
@@ -150,7 +150,7 @@ def interactive(task_name, model_cls, checkpoint=-1):
         checkpoint: Checkpoint number (train iteration) to load from. -1 for
                     best/latest checkpoint
     """
-    model = model_cls.load(task_name, checkpoint)
+    model, hparams = model_cls.load(task_name, checkpoint)
 
     vocab_word, vocab_char, _ = model.vocabs
     input_fn = get_input_processor_words(vocab_word, vocab_char)
